@@ -64,11 +64,13 @@ for i in {1..4}; do
 done
 
 ### --- STEP 3: Install kubectl ---
-echo "Installing kubectl..."
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-chmod 755 kubectl && mv kubectl /usr/local/bin
+# echo "Installing kubectl..."
+# curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+# chmod 755 kubectl && mv kubectl /usr/local/bin
 
 ### --- STEP 4: Prepare Kubespray environment ---
+# you can run the following manually, script might have issues on different versions
+# 
 echo "Setting up Kubespray..."
 apt update && apt install -y git python3-venv python3-pip
 
@@ -136,8 +138,8 @@ cat >> inventory/$INVENTORY_NAME/hosts.yaml <<EOF
 EOF
 
 ### --- Final Notes ---
-echo -e "\n✅ Kubernetes cluster VM provisioning complete."
-echo "📝 Inventory generated at: $KUBESPRAY_DIR/inventory/$INVENTORY_NAME/hosts.yaml"
+echo -e "\n DONE! Kubernetes cluster VM provisioning complete."
+echo " Inventory generated at: $KUBESPRAY_DIR/inventory/$INVENTORY_NAME/hosts.yaml"
 echo -e "\n--- NEXT STEPS ---"
 echo "You can now customize Kubernetes settings in:"
 echo "  inventory/$INVENTORY_NAME/group_vars/k8s_cluster/k8s-cluster.yml"
