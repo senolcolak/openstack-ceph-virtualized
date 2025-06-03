@@ -37,7 +37,7 @@ cd proxmox-k8s4rook
 
 ### 2. Create a cloud-init ready VM template (only once)
 ```bash
-./create-template.sh
+./cloud-init-template.sh
 ```
 > ⚙️ This will create a VM template (ID 4444 by default) based on Ubuntu 24.04 Cloud image.
 
