@@ -210,6 +210,17 @@ grep "^rbd_secret_uuid" /etc/kolla/passwords.yml |sed 's/:/ =/g' >> /etc/kolla/c
 # Kolla deploy
 kolla-ansible bootstrap-servers -i multinode
 kolla-ansible deploy -i multinode
+kolla-ansible post-deploy -i multinode
+
+cp .venv/share/kolla-ansible/init-runonce .
+sed -i "s/10.0.2.1'/10.2.199.254'/g" init-runonce
+sed -i "s/10.0.2./10.2.199./g" init-runonce
+# optional ubuntu image
+# wget https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+# openstack image create --disk-format qcow2 --container-format bare --public \
+#    --property os_type=linux --file noble-server-cloudimg-amd64.img Ubuntu-2404
+
+pip install python-openstackclient
 
 # Activate NICs for using inside nested VM's
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@10.1.199.145 "sudo ip link set ens19 up"
@@ -221,4 +232,3 @@ scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /tmp/openstack-d
 
 # Run script remotely
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@$OS0 "chmod +x $REMOTE_SCRIPT && bash $REMOTE_SCRIPT"
-

@@ -199,4 +199,3 @@ EOSCRIPT
 scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /tmp/rook-ceph-deploy.sh ubuntu@${NODE_LIST[0]}:$REMOTE_SCRIPT
 # Run script remotely
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${NODE_LIST[0]} "chmod +x $REMOTE_SCRIPT && bash $REMOTE_SCRIPT"
-
