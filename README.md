@@ -1,5 +1,5 @@
 
-# Proxmox K8s 4-Node Cluster for Rook/Ceph
+# Openstack and Rook/Ceph Cluster.
 
 This repository contains scripts to automate the creation of a 4-node Kubernetes cluster on Proxmox VE. It is specifically designed for running Rook/Ceph as the storage backend and supports multi-bridge network setups (e.g., `vmbr1199` and `vmbr2199`).
 
