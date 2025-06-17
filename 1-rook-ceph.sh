@@ -33,9 +33,6 @@ sleep 20
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${NODE_LIST[0]} "ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y >/dev/null 2>&1"
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${NODE_LIST[0]} "cat ~/.ssh/id_rsa.pub" >> $PUB_KEY_FILE
 
-# Copy this script to os0
-scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $0 ubuntu@${NODE_LIST[0]}:
-
 ### --- Create the rest of the nodes ---
 echo "Creating other nodes..."
 
@@ -58,9 +55,14 @@ for i in {1..6}; do
 done
 
 ### --- Remote setup on os0 ---
+REMOTE_SCRIPT="/home/ubuntu/rook-ceph-deploy.sh"
+
+# Create deployment script locally
+cat > /tmp/rook-ceph-deploy.sh <<'EOSCRIPT'
+#!/bin/bash
+
 echo "Setting up environment and Rook-Ceph installation on os0..."
 
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${NODE_LIST[0]} bash <<'EOF'
 set -e
 
 GATEWAY=10.1.199.254
@@ -148,18 +150,18 @@ sleep 20
 # Clone Rook-Ceph
 echo "Installing Rook-Ceph..."
 cd ~
-# copy kubectl config from remote 
+# copy kubectl config from remote
 mkdir ~/.kube
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null 10.1.199.141 'sudo sed "s/127.0.0.1/10.1.199.141/g" /etc/kubernetes/admin.conf' > ~/.kube/config
+
+ssh -o StrictHostKeyChecking=no ubuntu@10.1.199.141 'sudo cat /etc/kubernetes/admin.conf | sed "s/127.0.0.1/10.1.199.141/g"' > ~/.kube/config
 
 ## clone and prevent any warning message
-git clone https://github.com/rook/rook.git 
+git clone https://github.com/rook/rook.git
 
 cd rook/deploy/examples
 
-# Modify cluster.yaml for hostNetwork
-sed -i '/^  network:/,/^[^ ]/ s/^  hostNetwork:.*$/  hostNetwork: true/' cluster.yaml
-
+# Modify cluster.yaml for hostNetwork with tab space added
+sed -i '/^  network:/a\    hostNetwork: true' cluster.yaml
 
 # Apply Rook manifests
 kubectl apply -f crds.yaml
@@ -175,7 +177,26 @@ kubectl apply -f cluster.yaml
 # deploy toolbox
 kubectl apply -f toolbox.yaml
 
+# enable dashboard for rook-ceph and show the port of it
+kubectl apply -f dashboard-external-http.yaml
+
+# grep for the port
+## kubectl describe svc -n rook-ceph rook-ceph-mgr-dashboard-external-http|grep Endpoints
+
+# get the admin user password
+## echo "Admin password is:"
+## kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o jsonpath="{['data']['password']}" | base64 --decode && echo
+
 echo -e "\nRook-Ceph installation initiated. Monitor with:"
 echo "  kubectl -n rook-ceph get pods -w"
-EOF
+echo "  \nFor remote access, tunnel via ssh -L9999:EndpointsIP:NodePort root@ProxmoxIP"
+
+EOSCRIPT
+
+## run them remotely
+
+# Send script to os0
+scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /tmp/rook-ceph-deploy.sh ubuntu@${NODE_LIST[0]}:$REMOTE_SCRIPT
+# Run script remotely
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${NODE_LIST[0]} "chmod +x $REMOTE_SCRIPT && bash $REMOTE_SCRIPT"
 

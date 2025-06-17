@@ -17,6 +17,8 @@ START_IP_SUFFIX=145
 NODE_LIST=("os5:10.1.199.145" "os6:10.1.199.146")
 
 export KUBECONFIG=/home/ubuntu/.kube/config
+export ANSIBLE_HOST_KEY_CHECKING=False
+
 sudo apt install python3-virtualenv -y
 mkdir -p $KOLLA_DIR
 cd $KOLLA_DIR
@@ -30,7 +32,7 @@ kolla-ansible install-deps
 sudo mkdir -p /etc/kolla/config /etc/ceph
 sudo chown -R $(whoami):$(whoami) /etc/kolla /etc/ceph
 cp -r .venv/share/kolla-ansible/etc_examples/kolla/* /etc/kolla
- 
+
 ## generate passwords
 kolla-genpwd
 
