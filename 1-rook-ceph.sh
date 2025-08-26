@@ -166,6 +166,7 @@ sed -i '/^  network:/a\    hostNetwork: true' cluster.yaml
 # Apply Rook manifests
 kubectl apply -f crds.yaml
 kubectl apply -f common.yaml
+kubectl apply -f csi-operator.yaml
 kubectl apply -f operator.yaml
 
 # Wait for operator to be ready
